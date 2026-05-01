@@ -1,5 +1,10 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { useMapState } from "@/context/MapStateContext";
+
 export type Location = {
   id: string;
   lat: number;
@@ -9,20 +14,56 @@ export type Location = {
 };
 
 type MapViewProps = {
-  items: Location[];
+  locations: Location[];
 };
 
-export default function MapView({ items }: MapViewProps) {
-  return (
-    <div className="p-4">
-      <h2 className="text-lg font-semibold mb-2">Locations ({items.length})</h2>
-      <ul className="space-y-1 text-sm">
-        {items.map((item) => (
-          <li key={item.id}>
-            {item.name} — {item.lat}, {item.lng} ({item.status})
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+export default function MapView({ locations }: MapViewProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const { map, setMap } = useMapState();
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const instance = new maplibregl.Map({
+      container: containerRef.current,
+      style: "https://demotiles.maplibre.org/style.json",
+      center: [0, 20],
+      zoom: 1,
+    });
+
+    setMap(instance);
+
+    return () => {
+      instance.remove();
+      setMap(null);
+    };
+  }, [setMap]);
+
+  useEffect(() => {
+    if (!map) return;
+
+    const markers: maplibregl.Marker[] = [];
+
+    const addMarkers = () => {
+      for (const loc of locations) {
+        const marker = new maplibregl.Marker()
+          .setLngLat([loc.lng, loc.lat])
+          .setPopup(new maplibregl.Popup().setText(loc.name))
+          .addTo(map);
+        markers.push(marker);
+      }
+    };
+
+    if (map.loaded()) {
+      addMarkers();
+    } else {
+      map.once("load", addMarkers);
+    }
+
+    return () => {
+      markers.forEach((m) => m.remove());
+    };
+  }, [map, locations]);
+
+  return <div ref={containerRef} className="w-full h-screen" />;
 }

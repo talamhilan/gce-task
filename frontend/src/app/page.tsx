@@ -18,5 +18,5 @@ export default async function Home() {
   const data: LocationsResponse = await res.json();
   const items = data.payload.items;
 
-  return <MapView items={items} />;
+  return <MapView locations={items} />;
 }
