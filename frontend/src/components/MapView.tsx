@@ -28,7 +28,7 @@ export default function MapView({ locations }: MapViewProps) {
       container: containerRef.current,
       style: "https://demotiles.maplibre.org/style.json",
       center: [0, 20],
-      zoom: 1,
+      zoom: 2,
     });
 
     setMap(instance);
@@ -43,8 +43,10 @@ export default function MapView({ locations }: MapViewProps) {
     if (!map) return;
 
     const markers: maplibregl.Marker[] = [];
+    let cancelled = false;
 
     const addMarkers = () => {
+      if (cancelled) return;
       for (const loc of locations) {
         const marker = new maplibregl.Marker()
           .setLngLat([loc.lng, loc.lat])
@@ -61,6 +63,8 @@ export default function MapView({ locations }: MapViewProps) {
     }
 
     return () => {
+      cancelled = true;
+      map.off("load", addMarkers);
       markers.forEach((m) => m.remove());
     };
   }, [map, locations]);

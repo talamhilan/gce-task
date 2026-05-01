@@ -13,12 +13,22 @@ type LocationsResponse = {
   };
 };
 
+async function fetchAllLocations(): Promise<Location[]> {
+  const all: Location[] = [];
+  let cursor: string | null = null;
+  do {
+    const url = new URL("http://localhost:5000/api/locations");
+    if (cursor) url.searchParams.set("cursor", cursor);
+    const res = await fetch(url.toString(), { cache: "no-store" });
+    const data: LocationsResponse = await res.json();
+    all.push(...data.payload.items);
+    cursor = data.metadata.nextCursor;
+  } while (cursor !== null);
+  return all;
+}
+
 export default async function Home() {
-  const res = await fetch("http://localhost:5000/api/locations", {
-    cache: "no-store",
-  });
-  const data: LocationsResponse = await res.json();
-  const items = data.payload.items;
+  const items = await fetchAllLocations();
 
   return (
     <MapStateProvider>
