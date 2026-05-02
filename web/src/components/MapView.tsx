@@ -4,14 +4,7 @@ import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useMapState } from "@/context/MapStateContext";
-
-export type Location = {
-  id: string;
-  lat: number;
-  lng: number;
-  name: string;
-  status: string;
-};
+import type { Location } from "@/types/location";
 
 type MapViewProps = {
   locations: Location[];

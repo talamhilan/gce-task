@@ -1,7 +1,7 @@
 "use client";
 
 import { useMapState } from "@/context/MapStateContext";
-import type { Location } from "./MapView";
+import type { Location } from "@/types/location";
 
 type SidebarProps = {
   locations: Location[];
@@ -9,12 +9,13 @@ type SidebarProps = {
 
 export default function Sidebar({ locations }: SidebarProps) {
   const { map } = useMapState();
+  const sorted = [...locations].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <aside className="w-64 h-screen overflow-y-auto border-r p-4">
       <h2 className="text-lg font-semibold mb-2">Locations</h2>
       <ul className="space-y-1">
-        {locations.map((loc) => (
+        {sorted.map((loc) => (
           <li key={loc.id}>
             <button
               type="button"

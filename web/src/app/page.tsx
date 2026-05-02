@@ -1,6 +1,7 @@
-import MapView, { type Location } from "@/components/MapView";
+import MapView from "@/components/MapView";
 import Sidebar from "@/components/Sidebar";
 import { MapStateProvider } from "@/context/MapStateContext";
+import type { Location } from "@/types/location";
 
 type LocationsResponse = {
   metadata: {
@@ -13,11 +14,13 @@ type LocationsResponse = {
   };
 };
 
+const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:5000";
+
 async function fetchAllLocations(): Promise<Location[]> {
   const all: Location[] = [];
   let cursor: string | null = null;
   do {
-    const url = new URL("http://localhost:5000/api/locations");
+    const url = new URL(`${API_BASE_URL}/api/locations`);
     if (cursor) url.searchParams.set("cursor", cursor);
     const res = await fetch(url.toString(), { cache: "no-store" });
     const data: LocationsResponse = await res.json();
